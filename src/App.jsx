@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"
+import "./styles.css"
+import { TodoItem } from "./TodoItem"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [newTodoName, setNewTodoName] = useState("")
+  const [todos, setTodos] = useState([])
+
+  function addNewTodo() {
+    if (newTodoName === "") return
+
+    setTodos(currentTodos => {
+      return [
+        ...currentTodos,
+        { name: newTodoName, completed: false, id: crypto.randomUUID() },
+      ]
+    })
+    setNewTodoName("")
+  }
+
+  function toggleTodo(todoId, completed) {
+    setTodos(currentTodos => {
+      return currentTodos.map(todo => {
+        if (todo.id === todoId) return { ...todo, completed }
+
+        return todo
+      })
+    })
+  }
+
+  function deleteTodo(todoId) {
+    setTodos(currentTodos => {
+      return currentTodos.filter(todo => todo.id !== todoId)
+    })
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <ul id="list">
+        {todos.map(todo => {
+          return (
+            <TodoItem
+              key={todo.id}
+              {...todo}
+              toggleTodo={toggleTodo}
+              deleteTodo={deleteTodo}
+            />
+          )
+        })}
+      </ul>
+
+      <div id="new-todo-form">
+        <label htmlFor="todo-input">New Todo</label>
+        <input
+          type="text"
+          id="todo-input"
+          value={newTodoName}
+          onChange={e => setNewTodoName(e.target.value)}
+        />
+        <button onClick={addNewTodo}>Add Todo</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
+
 
 export default App
