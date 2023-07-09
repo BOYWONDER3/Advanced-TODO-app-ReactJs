@@ -17,10 +17,19 @@ function reducer(todos, { type, payload }) {
         ...todos,
         { name: payload.name, completed: false, id: crypto.randomUUID() },
       ];
-      default: 
-      throw new Error(`No action found for ${type}.`)
+    case ACTIONS.TOGGLE:
+      return todos.map((todo) => {
+        if (todo.id === payload.id) {
+          return { ...todo, completed: payload.completed };
+        }
+
+        return todo;
+      });
+      case ACTIONS.DELETE: 
+        return todos.filter((todo) => todo.id !== payload.id);
+    default:
+      throw new Error(`No action found for ${type}.`);
   }
-  return state;
 }
 
 function App() {
@@ -39,25 +48,17 @@ function App() {
   function addNewTodo() {
     if (newTodoName === "") return;
 
-    dispatch({ type: ACTIONS.ADD, payload: { name: newTodo } });
+    dispatch({ type: ACTIONS.ADD, payload: { name: newTodoName } });
 
     setNewTodoName("");
   }
 
   function toggleTodo(todoId, completed) {
-    setTodos((currentTodos) => {
-      return currentTodos.map((todo) => {
-        if (todo.id === todoId) return { ...todo, completed };
-
-        return todo;
-      });
-    });
+    dispatch({ type: ACTIONS.TOGGLE, payload: { id: todoId, completed } });
   }
 
   function deleteTodo(todoId) {
-    setTodos((currentTodos) => {
-      return currentTodos.filter((todo) => todo.id !== todoId);
-    });
+    dispatch({ type: ACTIONS.DELETE, payload: { id: todoId } });
   }
 
   return (
