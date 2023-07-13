@@ -1,6 +1,5 @@
 import { createContext, useEffect, useReducer, useState } from "react";
 import "./styles.css";
-import { TodoItem } from "./TodoItem";
 import { NewTodoForm } from "./NewTodoForm";
 import { TodoList } from "./TodoList";
 import { TodoFilterForm } from "./TodoFilterForm";
@@ -30,6 +29,13 @@ function reducer(todos, { type, payload }) {
       });
     case ACTIONS.DELETE:
       return todos.filter((todo) => todo.id !== payload.id);
+    case ACTIONS.UPDATE:
+      return todos.map((todo) => {
+        if (todo.id === payload.id) {
+          return { ...todo, name: payload.name };
+        }
+        return todo;
+      });
     default:
       throw new Error(`No action found for ${type}.`);
   }
@@ -48,7 +54,7 @@ function App() {
   });
 
   const filteredTodos = todos.filter((todo) => {
-    if(hideCompletedFilter && todo.completed) return false 
+    if (hideCompletedFilter && todo.completed) return false;
     return todos.name.includes(filterName);
   });
 
@@ -64,6 +70,10 @@ function App() {
     dispatch({ type: ACTIONS.TOGGLE, payload: { id: todoId, completed } });
   }
 
+  function updateTodoName(id, name) {
+    dispatch({ type: ACTIONS.UPDATE, payload: { id, name } });
+  }
+
   function deleteTodo(todoId) {
     dispatch({ type: ACTIONS.DELETE, payload: { id: todoId } });
   }
@@ -74,6 +84,7 @@ function App() {
         todos: filteredTodos,
         addNewTodo,
         toggleTodo,
+        updateTodoName,
         deleteTodo,
       }}
     >
