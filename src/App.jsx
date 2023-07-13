@@ -1,7 +1,9 @@
-import { useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import "./styles.css";
 import { TodoItem } from "./TodoItem";
 import { NewTodoForm } from "./NewTodoForm";
+import { TodoList } from "./TodoList";
+import { TodoFilterForm } from "./TodoFilterForm";
 
 const LOCAL_STORAGE_KEY = "TODOS";
 const ACTIONS = {
@@ -33,7 +35,11 @@ function reducer(todos, { type, payload }) {
   }
 }
 
+export const TodoContext = createContext;
+
 function App() {
+  const [filterName, setFilterName] = useState("");
+  const [hideCompletedFilter, setHideCompletedFilter] = useState(false);
   const [todos, dispatch] = useReducer(reducer, [], (initialValue) => {
     const value = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (value == null) return initialValue;
@@ -41,12 +47,16 @@ function App() {
     return JSON.parse(value);
   });
 
+  const filteredTodos = todos.filter((todo) => {
+    if(hideCompletedFilter && todo.completed) return false 
+    return todos.name.includes(filterName);
+  });
+
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
 
   function addNewTodo(name) {
-
     dispatch({ type: ACTIONS.ADD, payload: { name } });
   }
 
@@ -59,21 +69,23 @@ function App() {
   }
 
   return (
-    <>
-      <ul id="list">
-        {todos.map((todo) => {
-          return (
-            <TodoItem
-              key={todo.id}
-              {...todo}
-              toggleTodo={toggleTodo}
-              deleteTodo={deleteTodo}
-            />
-          );
-        })}
-      </ul>
-      <NewTodoForm addNewTodo={addNewTodo} />
-    </>
+    <TodoContext.provider
+      value={{
+        todos: filteredTodos,
+        addNewTodo,
+        toggleTodo,
+        deleteTodo,
+      }}
+    >
+      <TodoFilterForm
+        namee={filterName}
+        setName={setFilterName}
+        hideCompleted={hideCompletedFilter}
+        setHideCompleted={setHideCompletedFilter}
+      />
+      <TodoList />
+      <NewTodoForm />
+    </TodoContext.provider>
   );
 }
 

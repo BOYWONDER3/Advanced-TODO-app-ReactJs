@@ -1,8 +1,10 @@
-import { useRef } from "react";
+import React, { useContext, useRef } from "react";
+import { TodoContext } from "./App";
 
-export function NewTodoForm({addNewTodo}) {
+export function NewTodoForm() {
   
   const nameRef = useRef;
+  const { addNewTodo } = useContext(TodoContext)
 
   function handleSumbit(e) {
     e.preventDefault();
